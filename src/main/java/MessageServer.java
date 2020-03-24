@@ -48,15 +48,10 @@ public class MessageServer {
                         String[] params = line.split(" ", 3);
 
                         if (params[0].equals("publish")) {
-                            MessageQueueManager.getInstance().publish(params[1], params[2]);
-                            try {
-                                printWriter.println("success");
-                            } catch (Exception ex) {
-                                printWriter.println("publisher failed");
-                            }
+                            MessageQueueManager.getInstance().publish(params[1], params[2]).thenAccept(printWriter::println);
                         } else if (params[0].equals("consume")) {
                             try {
-                                printWriter.println(MessageQueueManager.getInstance().consume(params[1]));
+                                MessageQueueManager.getInstance().consume(params[1]).thenAccept(printWriter::println);
                             } catch (Exception ex) {
                                 printWriter.println("consumer failed");
                             }

@@ -41,7 +41,7 @@ public class MessageQueueManager {
         return map.add(t);
     }
 
-    Object consume(String queue) {
+    CompletableFuture<Object> consume(String queue) {
         MessageQueue<Object> map = messageQueues.get(queue);
         if (map == null) return subscribe(queue).poll();
         return map.poll();
