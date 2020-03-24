@@ -1,49 +1,35 @@
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by jerem on 3/24/2020.
  */
-public class MessageQueue {
+public class MessageQueue<T> {
 
-    private Map<String, ConcurrentLinkedQueue<Object>> messageQueues = new HashMap<>();
-    private static MessageQueue messageQueue;
+    private ConcurrentLinkedQueue<T>[] buckets;
+    private volatile int pointer = -1;
 
-
-    private MessageQueue() {
-
-    }
-
-    public static MessageQueue getInstance() {
-        if (messageQueue == null) {
-            messageQueue = new MessageQueue();
+    @SuppressWarnings("unchecked")
+    MessageQueue(int bucketSize) {
+        buckets = new ConcurrentLinkedQueue[bucketSize];
+        for(int i = 0; i<buckets.length; i++) {
+            buckets[i] = new ConcurrentLinkedQueue<>();
         }
-        return messageQueue;
     }
 
-    public boolean removeQueue(String queue) {
-        if (messageQueues.get(queue) != null) {
-            messageQueues.remove(queue);
-            return true;
-        }
-        return false;
+    private CompletableFuture<ConcurrentLinkedQueue<T>> get() {
+        return CompletableFuture.supplyAsync(() -> buckets[getPointer()] , ExecuterPool.executorService);
     }
 
-    private ConcurrentLinkedQueue<Object> subscribe(String queue) {
-        return messageQueues.computeIfAbsent(queue, k -> new ConcurrentLinkedQueue<Object>());
+    CompletableFuture<T> poll() {
+        return CompletableFuture.supplyAsync(() -> buckets[getPointer()].poll() , ExecuterPool.executorService);
     }
 
-    public <T> boolean publish(String queue, T t) {
-        ConcurrentLinkedQueue<Object> map = messageQueues.get(queue);
-        if (map == null) return subscribe(queue).add(t);
-        return map.add(t);
+    CompletableFuture<Boolean> add(T t) {
+       return CompletableFuture.supplyAsync(() -> buckets[getPointer()].add(t) , ExecuterPool.executorService);
     }
 
-    public Object consume(String queue) {
-        ConcurrentLinkedQueue<Object> map = messageQueues.get(queue);
-        if (map == null) return subscribe(queue).poll();
-        return map.poll();
+    private int getPointer() {
+        return pointer >= buckets.length ? pointer = 0 : pointer++;
     }
 }

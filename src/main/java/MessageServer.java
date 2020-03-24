@@ -1,5 +1,3 @@
-import com.sun.deploy.util.StringUtils;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -44,22 +42,22 @@ public class MessageServer {
                     printWriter.println("Connected to qe instnace");
 
                     boolean done = false;
-                    while(input.hasNextLine()) {
+                    while (input.hasNextLine()) {
                         String line = input.nextLine();
 
                         String[] params = line.split(" ", 3);
 
-                        if(params[0].equals("publish")) {
-                            MessageQueue.getInstance().publish(params[1],params[2]);
-                            try{
+                        if (params[0].equals("publish")) {
+                            MessageQueueManager.getInstance().publish(params[1], params[2]);
+                            try {
                                 printWriter.println("success");
-                            }catch (Exception ex) {
+                            } catch (Exception ex) {
                                 printWriter.println("publisher failed");
                             }
-                        } else if(params[0].equals("consume")){
-                            try{
-                                printWriter.println(MessageQueue.getInstance().consume(params[1]));
-                            }catch (Exception ex) {
+                        } else if (params[0].equals("consume")) {
+                            try {
+                                printWriter.println(MessageQueueManager.getInstance().consume(params[1]));
+                            } catch (Exception ex) {
                                 printWriter.println("consumer failed");
                             }
                         }
