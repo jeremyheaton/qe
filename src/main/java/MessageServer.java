@@ -13,7 +13,7 @@ public class MessageServer {
     }
 
     private static void startSever() {
-        int max_con = 3;
+        int max_con = 5;
         int port = 1133;
 
         //Create multiple ServerSockets to connect to a server
@@ -23,10 +23,9 @@ public class MessageServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        ServerSocket finalServerSocket = serverSocket;
 
         for (int i = 0; i < max_con; i++) {
-            ServerSocket finalServerSocket = serverSocket;
-
             Runnable runnable = () -> {
                 try {
                     Socket listenerSocket;

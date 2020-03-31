@@ -1,5 +1,6 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class MessageQueueManager {
 
     private Map<String, MessageQueue> messageQueues = new HashMap<>();
+    private Map<UUID, Message> sentMessages = new HashMap<>();
     private static MessageQueueManager messageQueueManager;
 
 
@@ -44,6 +46,9 @@ public class MessageQueueManager {
     CompletableFuture<Message> consume(String queue) {
         MessageQueue map = messageQueues.get(queue);
         if (map == null) return subscribe(queue).poll();
-        return map.poll();
+        return map.poll().thenApply(message -> {
+            sentMessages.put(message.getMessageId(), message);
+            return message;
+        });
     }
 }

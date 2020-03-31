@@ -10,6 +10,15 @@ public class Message {
 
     Message(String messageBody) {
         messageId = UUID.randomUUID();
+        this.messageBody = messageBody;
+    }
+
+    UUID getMessageId() {
+        return messageId;
+    }
+
+    public String getMessageBody() {
+        return messageBody;
     }
 
     public String toString() {
