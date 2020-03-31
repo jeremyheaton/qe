@@ -9,11 +9,11 @@ import java.util.concurrent.Executors;
  */
 public class MessageServer {
     public static void main(String[] args) {
-        connectToServerMultiple();
+        startSever();
     }
 
-    private static void connectToServerMultiple() {
-        int max_con = 3; //indicate maximum number of connections.
+    private static void startSever() {
+        int max_con = 3;
         int port = 1133;
 
         //Create multiple ServerSockets to connect to a server
@@ -23,10 +23,10 @@ public class MessageServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Create a for loop that creates max_con number of threads
+
         for (int i = 0; i < max_con; i++) {
             ServerSocket finalServerSocket = serverSocket;
-            //Create the thread
+
             Runnable runnable = () -> {
                 try {
                     Socket listenerSocket;
@@ -48,7 +48,7 @@ public class MessageServer {
                         String[] params = line.split(" ", 3);
 
                         if (params[0].equals("publish")) {
-                            MessageQueueManager.getInstance().publish(params[1], params[2]).thenAccept(printWriter::println);
+                            MessageQueueManager.getInstance().publish(params[1], new Message(params[2])).thenAccept(printWriter::println);
                         } else if (params[0].equals("consume")) {
                             try {
                                 MessageQueueManager.getInstance().consume(params[1]).thenAccept(printWriter::println);

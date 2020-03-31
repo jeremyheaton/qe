@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class MessageQueueManager {
 
-    private Map<String, MessageQueue<Object>> messageQueues = new HashMap<>();
+    private Map<String, MessageQueue> messageQueues = new HashMap<>();
     private static MessageQueueManager messageQueueManager;
 
 
@@ -16,7 +16,7 @@ public class MessageQueueManager {
 
     }
 
-    public static MessageQueueManager getInstance() {
+    static MessageQueueManager getInstance() {
         if (messageQueueManager == null) {
             messageQueueManager = new MessageQueueManager();
         }
@@ -31,18 +31,18 @@ public class MessageQueueManager {
         return false;
     }
 
-    private MessageQueue<Object> subscribe(String queue) {
-        return messageQueues.computeIfAbsent(queue, k -> new MessageQueue<Object>(10));
+    private MessageQueue subscribe(String queue) {
+        return messageQueues.computeIfAbsent(queue, k -> new MessageQueue());
     }
 
-    CompletableFuture<Boolean> publish(String queue, Object t) {
-        MessageQueue<Object> map = messageQueues.get(queue);
-        if (map == null) return subscribe(queue).add(t);
-        return map.add(t);
+    CompletableFuture<Boolean> publish(String queue, Message message) {
+        MessageQueue map = messageQueues.get(queue);
+        if (map == null) return subscribe(queue).add(message);
+        return map.add(message);
     }
 
-    CompletableFuture<Object> consume(String queue) {
-        MessageQueue<Object> map = messageQueues.get(queue);
+    CompletableFuture<Message> consume(String queue) {
+        MessageQueue map = messageQueues.get(queue);
         if (map == null) return subscribe(queue).poll();
         return map.poll();
     }
